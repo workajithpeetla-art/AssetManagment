@@ -5,7 +5,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'office-asset-management-secret-key'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'office-asset-management-secret-key')
 
 # Absolute path for SQLite DB Browser compatibility
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -54,6 +54,9 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+# Ensure database tables and default admin are created on startup (including under Gunicorn)
+init_db()
 
 # --- Flask-Login Configuration ---
 login_manager = LoginManager(app)
@@ -193,5 +196,5 @@ def create_admin_command():
         conn.close()
 
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

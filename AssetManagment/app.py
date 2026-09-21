@@ -113,6 +113,34 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/admin/create-user', methods=['POST'])
+@login_required
+def create_user_route():
+    if current_user.role != 'admin':
+        flash('Unauthorized action.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+
+    if not username or not password:
+        flash('Username and password are required.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+                     (username, hashed_pw, 'admin'))
+        conn.commit()
+        flash(f'Admin user "{username}" created successfully!', 'success')
+    except sqlite3.IntegrityError:
+        flash(f'Error: Username "{username}" already exists.', 'danger')
+    finally:
+        conn.close()
+
+    return redirect(url_for('dashboard'))
+
 @app.route('/asset/add', methods=['POST'])
 @login_required
 def add_asset():

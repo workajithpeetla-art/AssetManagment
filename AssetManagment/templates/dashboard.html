@@ -1,130 +1,205 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Asset Inventory</h2>
+<!-- Top Bar Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
-        <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#addAdminModal">+ Create Admin</button>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAssetModal">+ Add Asset</button>
+        <h3 class="fw-bold mb-1">Asset Overview</h3>
+        <p class="text-muted small mb-0">Track and manage hardware equipment across the organization</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-custom-secondary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+            <i class="fa-solid fa-user-plus me-1"></i> New Admin
+        </button>
+        <button class="btn btn-custom-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+            <i class="fa-solid fa-plus me-1"></i> Add Asset
+        </button>
     </div>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Asset Name</th>
-                    <th>Category</th>
-                    <th>Serial Number</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for asset in assets %}
-                <tr>
-                    <td>{{ asset['id'] }}</td>
-                    <td><strong>{{ asset['name'] }}</strong></td>
-                    <td>{{ asset['category'] }}</td>
-                    <td><code>{{ asset['serial_number'] }}</code></td>
-                    <td>
-                        {% if asset['status'] == 'Available' %}
-                            <span class="badge bg-success">Available</span>
-                        {% elif asset['status'] == 'Assigned' %}
-                            <span class="badge bg-primary">Assigned</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark">Maintenance</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ asset['assigned_to'] if asset['assigned_to'] else '-' }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editModal{{ asset['id'] }}">Edit</button>
-                        <a href="{{ url_for('delete_asset', id=asset['id']) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this asset?')">Delete</a>
-                    </td>
-                </tr>
+<!-- Stats Counter Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card card-custom p-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-boxes-stacked fa-lg"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Total Assets</span>
+                    <h4 class="fw-bold mb-0">{{ assets|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom p-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-success bg-opacity-10 text-success rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-circle-check fa-lg"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Available</span>
+                    <h4 class="fw-bold mb-0">{{ assets|selectattr('status', 'equalto', 'Available')|list|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-custom p-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-info bg-opacity-10 text-info rounded-3 p-3 me-3">
+                    <i class="fa-solid fa-user-check fa-lg"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Assigned</span>
+                    <h4 class="fw-bold mb-0">{{ assets|selectattr('status', 'equalto', 'Assigned')|list|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Edit Asset Modal -->
-                <div class="modal fade" id="editModal{{ asset['id'] }}" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form action="{{ url_for('edit_asset', id=asset['id']) }}" method="POST">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Edit Asset #{{ asset['id'] }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Asset Name</label>
-                                        <input type="text" class="form-control" name="name" value="{{ asset['name'] }}" required>
+<!-- Inventory Table Card -->
+<div class="card card-custom">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Asset Details</th>
+                        <th>Category</th>
+                        <th>Serial Number</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td class="ps-4 text-muted fw-bold">#{{ asset['id'] }}</td>
+                        <td>
+                            <span class="fw-semibold text-dark d-block">{{ asset['name'] }}</span>
+                        </td>
+                        <td>
+                            <span class="text-secondary small"><i class="fa-solid fa-tag me-1 text-muted"></i>{{ asset['category'] }}</span>
+                        </td>
+                        <td>
+                            <code class="bg-light text-dark px-2 py-1 rounded small border">{{ asset['serial_number'] }}</code>
+                        </td>
+                        <td>
+                            {% if asset['status'] == 'Available' %}
+                                <span class="badge bg-success bg-opacity-10 text-success badge-status"><i class="fa-solid fa-circle me-1 small"></i>Available</span>
+                            {% elif asset['status'] == 'Assigned' %}
+                                <span class="badge bg-primary bg-opacity-10 text-primary badge-status"><i class="fa-solid fa-user me-1 small"></i>Assigned</span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning badge-status"><i class="fa-solid fa-screwdriver-wrench me-1 small"></i>Maintenance</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if asset['assigned_to'] %}
+                                <span class="fw-medium text-dark"><i class="fa-regular fa-user text-muted me-1"></i>{{ asset['assigned_to'] }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-custom-secondary me-1" data-bs-toggle="modal" data-bs-target="#editModal{{ asset['id'] }}">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                            <a href="{{ url_for('delete_asset', id=asset['id']) }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete this asset?')">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Asset Modal -->
+                    <div class="modal fade" id="editModal{{ asset['id'] }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <form action="{{ url_for('edit_asset', id=asset['id']) }}" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Edit Asset #{{ asset['id'] }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select" name="category" required>
-                                            <option value="Laptop" {% if asset['category'] == 'Laptop' %}selected{% endif %}>Laptop</option>
-                                            <option value="Mouse" {% if asset['category'] == 'Mouse' %}selected{% endif %}>Mouse</option>
-                                            <option value="Keyboard" {% if asset['category'] == 'Keyboard' %}selected{% endif %}>Keyboard</option>
-                                            <option value="Monitor" {% if asset['category'] == 'Monitor' %}selected{% endif %}>Monitor</option>
-                                            <option value="Other" {% if asset['category'] == 'Other' %}selected{% endif %}>Other</option>
-                                        </select>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-medium">Asset Name</label>
+                                            <input type="text" class="form-control" name="name" value="{{ asset['name'] }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-medium">Category</label>
+                                            <select class="form-select" name="category" required>
+                                                <option value="Laptop" {% if asset['category'] == 'Laptop' %}selected{% endif %}>Laptop</option>
+                                                <option value="Mouse" {% if asset['category'] == 'Mouse' %}selected{% endif %}>Mouse</option>
+                                                <option value="Keyboard" {% if asset['category'] == 'Keyboard' %}selected{% endif %}>Keyboard</option>
+                                                <option value="Monitor" {% if asset['category'] == 'Monitor' %}selected{% endif %}>Monitor</option>
+                                                <option value="Other" {% if asset['category'] == 'Other' %}selected{% endif %}>Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-medium">Serial Number</label>
+                                            <input type="text" class="form-control" name="serial_number" value="{{ asset['serial_number'] }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-medium">Status</label>
+                                            <select class="form-select" name="status" required>
+                                                <option value="Available" {% if asset['status'] == 'Available' %}selected{% endif %}>Available</option>
+                                                <option value="Assigned" {% if asset['status'] == 'Assigned' %}selected{% endif %}>Assigned</option>
+                                                <option value="Maintenance" {% if asset['status'] == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-medium">Assigned To (Employee Name)</label>
+                                            <input type="text" class="form-control" name="assigned_to" value="{{ asset['assigned_to'] if asset['assigned_to'] else '' }}">
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Serial Number</label>
-                                        <input type="text" class="form-control" name="serial_number" value="{{ asset['serial_number'] }}" required>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-custom-primary">Save Changes</button>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select" name="status" required>
-                                            <option value="Available" {% if asset['status'] == 'Available' %}selected{% endif %}>Available</option>
-                                            <option value="Assigned" {% if asset['status'] == 'Assigned' %}selected{% endif %}>Assigned</option>
-                                            <option value="Maintenance" {% if asset['status'] == 'Maintenance' %}selected{% endif %}>Maintenance</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Assigned To (Employee Name)</label>
-                                        <input type="text" class="form-control" name="assigned_to" value="{{ asset['assigned_to'] if asset['assigned_to'] else '' }}">
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                {% else %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">No assets found. Click "+ Add Asset" to add one.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-box-open fa-2xl d-block mb-3 opacity-50"></i>
+                            No assets found. Click "Add Asset" to start tracking hardware.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Create Admin Modal -->
+<!-- Add Admin Modal -->
 <div class="modal fade" id="addAdminModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form action="{{ url_for('create_user_route') }}" method="POST">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create New Admin User</h5>
+                    <h5 class="modal-title fw-bold">Create New Admin</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Admin Username</label>
+                        <label class="form-label small fw-medium">Admin Username</label>
                         <input type="text" class="form-control" name="username" placeholder="e.g. ajith" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Admin Password</label>
+                        <label class="form-label small fw-medium">Admin Password</label>
                         <input type="password" class="form-control" name="password" placeholder="Enter secure password" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create Admin</button>
+                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-custom-primary">Create User</button>
                 </div>
             </form>
         </div>
@@ -133,20 +208,20 @@
 
 <!-- Add Asset Modal -->
 <div class="modal fade" id="addAssetModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form action="{{ url_for('add_asset') }}" method="POST">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New Asset</h5>
+                    <h5 class="modal-title fw-bold">Add New Asset</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Asset Name</label>
+                        <label class="form-label small fw-medium">Asset Name</label>
                         <input type="text" class="form-control" name="name" placeholder="e.g. MacBook Pro M2" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Category</label>
+                        <label class="form-label small fw-medium">Category</label>
                         <select class="form-select" name="category" required>
                             <option value="Laptop">Laptop</option>
                             <option value="Mouse">Mouse</option>
@@ -156,11 +231,11 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Serial Number</label>
+                        <label class="form-label small fw-medium">Serial Number</label>
                         <input type="text" class="form-control" name="serial_number" placeholder="e.g. SN-1029384" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Status</label>
+                        <label class="form-label small fw-medium">Status</label>
                         <select class="form-select" name="status" required>
                             <option value="Available">Available</option>
                             <option value="Assigned">Assigned</option>
@@ -168,12 +243,13 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Assigned To (Optional)</label>
+                        <label class="form-label small fw-medium">Assigned To (Optional)</label>
                         <input type="text" class="form-control" name="assigned_to" placeholder="Employee Name">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Add Asset</button>
+                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success font-weight-medium">Add Asset</button>
                 </div>
             </form>
         </div>

@@ -1,0 +1,109 @@
+/* --- Global Styles --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6f9;
+    color: #333335;
+}
+
+/* --- Navbar Customization --- */
+.navbar-custom {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.brand-logo {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #38bdf8 !important;
+}
+
+/* --- Cards --- */
+.card-custom {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+}
+
+/* --- Tables --- */
+.table-custom thead {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.table-custom tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-custom tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* --- Badges --- */
+.badge-status {
+    font-weight: 500;
+    padding: 0.45em 0.75em;
+    border-radius: 6px;
+}
+
+/* --- Buttons --- */
+.btn-custom-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.btn-custom-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+}
+
+.btn-custom-secondary {
+    background-color: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #475569;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+.btn-custom-secondary:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+/* --- Modals --- */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem 1.5rem;
+}
+
+/* --- Form Controls --- */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 0.6rem 0.85rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
